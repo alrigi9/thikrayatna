@@ -4,337 +4,582 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ذكرياتنا ✈</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Tajawal',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f5f5;padding:1rem}
-#app{width:100%;max-width:560px;min-height:600px;border-radius:24px;position:relative;overflow:hidden;transition:background 0.5s}
-canvas#particles{position:absolute;inset:0;z-index:0;pointer-events:none}
-.page{display:none;padding:2.5rem 2rem;position:relative;z-index:2}
-.page.active{display:block;animation:fadeSlide 0.4s ease}
-@keyframes fadeSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+body{font-family:'Tajawal',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#111;padding:1rem}
+#app{width:100%;max-width:580px;min-height:620px;border-radius:28px;position:relative;overflow:hidden;transition:background 0.6s}
+canvas#pc{position:absolute;inset:0;z-index:0;pointer-events:none}
+.pg{display:none;padding:2.5rem 2rem;position:relative;z-index:2}
+.pg.active{display:block;animation:fs 0.45s ease}
+@keyframes fs{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
-.t-sakura{--bg1:#fff0f5;--bg2:#ffe4ef;--acc:#c2185b;--acc2:#f06292;--acc3:#fce4ec;--txt:#4b1528}
-.t-ocean {--bg1:#e8f4fd;--bg2:#d0eaf8;--acc:#0d47a1;--acc2:#1976d2;--acc3:#e3f2fd;--txt:#042c53}
-.t-sunset{--bg1:#fff3e0;--bg2:#ffe0b2;--acc:#bf360c;--acc2:#e64a19;--acc3:#fbe9e7;--txt:#412402}
-.t-forest{--bg1:#e8f5e9;--bg2:#c8e6c9;--acc:#1b5e20;--acc2:#388e3c;--acc3:#f1f8e9;--txt:#173404}
-.t-galaxy{--bg1:#1a1a2e;--bg2:#16213e;--acc:#7c4dff;--acc2:#aa00ff;--acc3:#2d1b69;--txt:#ede7ff}
+.t-sakura{--b1:#fff0f5;--b2:#ffe4ef;--ac:#c2185b;--a2:#f06292;--a3:#fce4ec;--tx:#4b1528}
+.t-ocean {--b1:#e8f4fd;--b2:#d0eaf8;--ac:#0d47a1;--a2:#1976d2;--a3:#e3f2fd;--tx:#042c53}
+.t-sunset{--b1:#fff3e0;--b2:#ffe0b2;--ac:#bf360c;--a2:#e64a19;--a3:#fbe9e7;--tx:#412402}
+.t-forest{--b1:#e8f5e9;--b2:#c8e6c9;--ac:#1b5e20;--a2:#388e3c;--a3:#f1f8e9;--tx:#173404}
+.t-galaxy{--b1:#1a1a2e;--b2:#16213e;--ac:#7c4dff;--a2:#aa00ff;--a3:#2d1b69;--tx:#ede7ff}
 
-#app{background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%)}
+#app{background:linear-gradient(160deg,var(--b1) 0%,var(--b2) 100%)}
+.dc{position:absolute;border-radius:50%;opacity:0.13;z-index:1;pointer-events:none}
 
-.deco{position:absolute;border-radius:50%;opacity:0.12;z-index:1;pointer-events:none}
-.deco1{width:220px;height:220px;background:var(--acc);top:-70px;right:-70px}
-.deco2{width:160px;height:160px;background:var(--acc2);bottom:-50px;left:-50px}
+/* typography */
+.htitle{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--ac);text-align:center;margin-bottom:6px}
+.hsub{font-size:14px;color:var(--tx);opacity:0.65;text-align:center;margin-bottom:2rem}
+.lbl{font-size:11px;font-weight:700;color:var(--ac);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:1px}
 
-.hero-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--acc);text-align:center;margin-bottom:6px}
-.hero-sub{font-size:14px;color:var(--txt);opacity:0.65;text-align:center;margin-bottom:2rem}
+/* inputs */
+.fi{width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid var(--a2);background:rgba(255,255,255,0.7);font-size:15px;color:var(--tx);font-family:'Tajawal',sans-serif;outline:none;transition:all 0.2s;margin-bottom:1.2rem}
+.fi:focus{border-color:var(--ac);background:rgba(255,255,255,0.95);box-shadow:0 0 0 3px rgba(0,0,0,0.06)}
+.fi::placeholder{color:var(--tx);opacity:0.35}
 
-label.lbl{font-size:11px;font-weight:700;color:var(--acc);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:1px}
-.fi{width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid var(--acc2);background:rgba(255,255,255,0.7);font-size:15px;color:var(--txt);font-family:'Tajawal',sans-serif;outline:none;transition:all 0.2s;margin-bottom:1.2rem}
-.fi:focus{border-color:var(--acc);background:rgba(255,255,255,0.95);box-shadow:0 0 0 3px rgba(0,0,0,0.06)}
-.fi::placeholder{color:var(--txt);opacity:0.35}
+/* buttons */
+.btn-main{width:100%;padding:15px;border-radius:14px;border:none;background:var(--ac);color:#fff;font-size:16px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s}
+.btn-main:hover{background:var(--a2);transform:translateY(-2px)}
+.btn-main:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-sec{padding:13px 20px;border-radius:12px;border:1.5px solid var(--ac);background:transparent;color:var(--ac);font-size:14px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s}
+.btn-sec:hover{background:var(--a3)}
+.btn-add{background:none;border:1.5px dashed var(--a2);color:var(--ac);padding:10px 16px;border-radius:12px;cursor:pointer;font-size:13px;font-family:'Tajawal',sans-serif;width:100%;margin-bottom:1.2rem;transition:all 0.2s}
+.btn-add:hover{background:var(--a3)}
 
-.add-btn{background:none;border:1.5px dashed var(--acc2);color:var(--acc);padding:10px 16px;border-radius:12px;cursor:pointer;font-size:13px;font-family:'Tajawal',sans-serif;width:100%;margin-bottom:1.2rem;transition:all 0.2s}
-.add-btn:hover{background:var(--acc3)}
-.rm-btn{background:none;border:none;color:var(--acc2);cursor:pointer;font-size:16px;padding:0 6px;opacity:0.6;line-height:1}
-.rm-btn:hover{opacity:1}
-.person-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.person-row .fi{flex:1;margin:0}
+/* theme swatches */
+.sw{width:46px;height:46px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.2s,border-color 0.2s}
+.sw.active{border-color:var(--tx);transform:scale(1.15)}
+.sw[data-t=sakura]{background:linear-gradient(135deg,#f48fb1,#c2185b)}
+.sw[data-t=ocean]{background:linear-gradient(135deg,#64b5f6,#0d47a1)}
+.sw[data-t=sunset]{background:linear-gradient(135deg,#ffab40,#bf360c)}
+.sw[data-t=forest]{background:linear-gradient(135deg,#81c784,#1b5e20)}
+.sw[data-t=galaxy]{background:linear-gradient(135deg,#e040fb,#7c4dff)}
 
-.themes-row{display:flex;gap:12px;margin-bottom:2rem;flex-wrap:wrap}
-.swatch{width:46px;height:46px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.2s,border-color 0.2s}
-.swatch.active{border-color:var(--txt);transform:scale(1.15)}
-.swatch[data-t=sakura]{background:linear-gradient(135deg,#f48fb1,#c2185b)}
-.swatch[data-t=ocean] {background:linear-gradient(135deg,#64b5f6,#0d47a1)}
-.swatch[data-t=sunset]{background:linear-gradient(135deg,#ffab40,#bf360c)}
-.swatch[data-t=forest]{background:linear-gradient(135deg,#81c784,#1b5e20)}
-.swatch[data-t=galaxy]{background:linear-gradient(135deg,#e040fb,#7c4dff)}
+/* person row */
+.prow{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.prow .fi{flex:1;margin:0}
+.rmbtn{background:none;border:none;color:var(--a2);cursor:pointer;font-size:16px;padding:0 6px;opacity:0.6}
+.rmbtn:hover{opacity:1}
 
-.start-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--acc);color:#fff;font-size:16px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
-.start-btn:hover{background:var(--acc2);transform:translateY(-2px)}
+/* code box */
+.code-box{background:rgba(0,0,0,0.15);border-radius:16px;padding:1.5rem;text-align:center;margin:1.5rem 0;border:2px dashed var(--a2)}
+.code-num{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:var(--ac);letter-spacing:8px}
+.code-lbl{font-size:13px;color:var(--tx);opacity:0.65;margin-top:6px}
 
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:1.5rem}
+.tab{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--a2);background:transparent;color:var(--ac);font-size:14px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s}
+.tab.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* place page */
 .place-banner{background:rgba(255,255,255,0.55);border-radius:16px;padding:1rem 1.5rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.8)}
-.place-step{font-size:11px;color:var(--acc2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.place-step{font-size:11px;color:var(--a2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
-.chip{padding:5px 14px;border-radius:20px;background:var(--acc3);color:var(--acc);font-size:13px;font-weight:500;border:1.5px solid var(--acc2)}
+.chip{padding:5px 14px;border-radius:20px;background:var(--a3);color:var(--ac);font-size:13px;font-weight:500;border:1.5px solid var(--a2)}
 
-.t-card{background:rgba(255,255,255,0.55);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.75)}
-.t-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
-.t-nm{font-size:14px;font-weight:500;color:var(--txt)}
+.tcard{background:rgba(255,255,255,0.55);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.75)}
+.thead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.tnm{font-size:14px;font-weight:500;color:var(--tx)}
+.upzone{border:2px dashed var(--a2);border-radius:12px;padding:1.2rem;text-align:center;cursor:pointer;background:rgba(255,255,255,0.3);transition:background 0.15s}
+.upzone:hover{background:var(--a3)}
+.upzone input{display:none}
+.prow2{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pthumb{width:64px;height:64px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.85)}
 
-.upload-zone{border:2px dashed var(--acc2);border-radius:12px;padding:1.2rem;text-align:center;cursor:pointer;background:rgba(255,255,255,0.3);transition:background 0.15s}
-.upload-zone:hover{background:var(--acc3)}
-.upload-zone input{display:none}
-.upload-ico{font-size:22px;margin-bottom:4px;color:var(--acc2)}
-.upload-lbl{font-size:12px;color:var(--acc2)}
-.photo-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.photo-thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.85)}
+.brow{display:flex;gap:10px;margin-top:1.5rem}
 
-.btn-row{display:flex;gap:10px;margin-top:1.5rem}
-.btn-next{flex:1;padding:13px;border-radius:12px;border:none;background:var(--acc);color:#fff;font-size:14px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s}
-.btn-next:hover{background:var(--acc2)}
-.btn-end{padding:13px 20px;border-radius:12px;border:1.5px solid var(--acc);background:transparent;color:var(--acc);font-size:14px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all 0.2s}
-.btn-end:hover{background:var(--acc3)}
+/* map finale */
+#map-container{padding:0}
+.map-header{background:linear-gradient(135deg,var(--ac),var(--a2));padding:2rem;text-align:center}
+.map-title{font-family:'Playfair Display',serif;font-size:26px;color:#fff;margin-bottom:4px}
+.map-sub{font-size:13px;color:rgba(255,255,255,0.8)}
+.map-canvas{position:relative;background:rgba(255,255,255,0.15);margin:1.5rem;border-radius:20px;overflow:hidden;min-height:300px;border:1px solid rgba(255,255,255,0.3)}
+.map-svg{width:100%;height:100%}
+.place-dot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:3}
+.dot-circle{width:36px;height:36px;border-radius:50%;background:var(--ac);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;transition:transform 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.dot-circle:hover{transform:scale(1.2)}
+.dot-label{position:absolute;top:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px;white-space:nowrap;font-family:'Tajawal',sans-serif}
 
-.sum-title{font-family:'Playfair Display',serif;font-size:28px;color:var(--acc);text-align:center;margin-bottom:4px}
-.sum-sub{font-size:13px;color:var(--txt);opacity:0.6;text-align:center;margin-bottom:2rem}
-.sum-card{background:rgba(255,255,255,0.6);border-radius:16px;padding:1.25rem;margin-bottom:1.2rem;border:1px solid rgba(255,255,255,0.85)}
-.sum-card-title{font-size:15px;font-weight:700;color:var(--acc);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.pnum{width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.sum-t-lbl{font-size:12px;color:var(--acc2);font-weight:700;margin-bottom:6px;margin-top:10px}
-.sum-photos{display:flex;flex-wrap:wrap;gap:6px}
-.sum-photos img{width:58px;height:58px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.9)}
-.new-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--acc);color:#fff;font-size:15px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;margin-top:1rem;transition:all 0.2s}
-.new-btn:hover{background:var(--acc2)}
+.place-popup{background:rgba(255,255,255,0.95);border-radius:16px;margin:0 1.5rem 1.5rem;padding:1.25rem;border:1px solid rgba(255,255,255,0.9);display:none}
+.place-popup.active{display:block;animation:fs 0.3s ease}
+.popup-title{font-size:16px;font-weight:700;color:var(--ac);margin-bottom:12px}
+.popup-photos{display:flex;flex-wrap:wrap;gap:6px}
+.popup-photos img{width:72px;height:72px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.9)}
+.popup-traveler{margin-bottom:10px}
+.popup-t-lbl{font-size:12px;font-weight:700;color:var(--a2);margin-bottom:5px}
 
-.error-shake{animation:shake 0.35s ease}
+.loading{text-align:center;padding:2rem;color:var(--ac);font-size:14px}
+.spinner{width:32px;height:32px;border:3px solid var(--a3);border-top-color:var(--ac);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.err{color:#e53935;font-size:13px;text-align:center;padding:8px;background:rgba(229,57,53,0.1);border-radius:8px;margin-bottom:1rem}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake 0.35s ease}
 </style>
 </head>
 <body>
 <div id="app" class="t-sakura">
-  <canvas id="particles"></canvas>
-  <div class="deco deco1"></div>
-  <div class="deco deco2"></div>
+  <canvas id="pc"></canvas>
+  <div class="dc" style="width:220px;height:220px;background:var(--ac);top:-70px;right:-70px"></div>
+  <div class="dc" style="width:160px;height:160px;background:var(--a2);bottom:-50px;left:-50px"></div>
 
   <!-- SETUP -->
-  <div id="p-setup" class="page active" style="max-width:480px;margin:0 auto">
+  <div id="pg-setup" class="pg active" style="max-width:480px;margin:0 auto">
     <div style="text-align:center;margin-bottom:1.5rem;padding-top:0.5rem">
-      <div style="font-size:40px;margin-bottom:8px">✈️</div>
-      <div class="hero-title">ذكرياتنا</div>
-      <div class="hero-sub">سجّل لحظاتك مع من تحب في كل مكان</div>
+      <div style="font-size:42px;margin-bottom:8px">✈️</div>
+      <div class="htitle">ذكرياتنا</div>
+      <div class="hsub">سجّل لحظاتك مع من تحب في كل مكان</div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('new')">رحلة جديدة</button>
+      <button class="tab" onclick="switchTab('join')">انضم لرحلة</button>
     </div>
 
-    <label class="lbl">اسمك *</label>
-    <input class="fi" id="name-main" placeholder="اكتب اسمك هنا..." />
-
-    <div id="extra-names"></div>
-    <button class="add-btn" id="add-btn" onclick="addPerson()">+ أضف شخص معك (اختياري)</button>
-
-    <label class="lbl">ثيم الرحلة</label>
-    <div style="margin-bottom:8px;font-size:13px;color:var(--txt);opacity:0.65" id="theme-name-lbl">وردي ساكورا 🌸</div>
-    <div class="themes-row">
-      <div class="swatch active" data-t="sakura" title="وردي ساكورا" onclick="setTheme('sakura',this)"></div>
-      <div class="swatch" data-t="ocean"  title="المحيط الأزرق" onclick="setTheme('ocean',this)"></div>
-      <div class="swatch" data-t="sunset" title="غروب الشمس"   onclick="setTheme('sunset',this)"></div>
-      <div class="swatch" data-t="forest" title="الغابة الخضراء" onclick="setTheme('forest',this)"></div>
-      <div class="swatch" data-t="galaxy" title="مجرة الفضاء"   onclick="setTheme('galaxy',this)"></div>
+    <!-- NEW TRIP -->
+    <div id="tab-new">
+      <label class="lbl">اسمك *</label>
+      <input class="fi" id="name-main" placeholder="اكتب اسمك هنا..." />
+      <div id="extra-names"></div>
+      <button class="btn-add" id="add-btn" onclick="addPerson()">+ أضف شخص معك (اختياري)</button>
+      <label class="lbl">ثيم الرحلة</label>
+      <div style="font-size:13px;color:var(--tx);opacity:0.65;margin-bottom:10px" id="theme-lbl">وردي ساكورا 🌸</div>
+      <div style="display:flex;gap:12px;margin-bottom:2rem;flex-wrap:wrap">
+        <div class="sw active" data-t="sakura" onclick="setTheme('sakura',this)"></div>
+        <div class="sw" data-t="ocean"  onclick="setTheme('ocean',this)"></div>
+        <div class="sw" data-t="sunset" onclick="setTheme('sunset',this)"></div>
+        <div class="sw" data-t="forest" onclick="setTheme('forest',this)"></div>
+        <div class="sw" data-t="galaxy" onclick="setTheme('galaxy',this)"></div>
+      </div>
+      <div id="err-new" class="err" style="display:none"></div>
+      <button class="btn-main" id="start-btn" onclick="startTrip()">ابدأ رحلتك ✈</button>
     </div>
 
-    <button class="start-btn" onclick="startTrip()">ابدأ رحلتك ✈</button>
+    <!-- JOIN TRIP -->
+    <div id="tab-join" style="display:none">
+      <label class="lbl">اسمك *</label>
+      <input class="fi" id="join-name" placeholder="اكتب اسمك..." />
+      <label class="lbl">كود الرحلة *</label>
+      <input class="fi" id="join-code" placeholder="أدخل الكود المكون من 6 أرقام..." maxlength="6" style="font-size:22px;text-align:center;letter-spacing:6px" />
+      <div id="err-join" class="err" style="display:none"></div>
+      <button class="btn-main" id="join-btn" onclick="joinTrip()">انضم للرحلة 🚀</button>
+    </div>
+  </div>
+
+  <!-- WAITING / CODE SHARE -->
+  <div id="pg-code" class="pg" style="max-width:480px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:1rem;padding-top:0.5rem">
+      <div style="font-size:36px;margin-bottom:6px">🎉</div>
+      <div class="htitle">رحلتك جاهزة!</div>
+      <div class="hsub">شارك هذا الكود مع رفيقك</div>
+    </div>
+    <div class="code-box">
+      <div class="code-num" id="trip-code-display">------</div>
+      <div class="code-lbl">كود الرحلة — أرسله لمن معك</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.4);border-radius:14px;padding:1rem;margin-bottom:1.5rem;font-size:13px;color:var(--tx);text-align:center;line-height:1.8">
+      رفيقك يفتح الموقع ويضغط <strong>انضم لرحلة</strong><br>ويدخل الكود وينضم معك 🤝
+    </div>
+    <button class="btn-main" onclick="goToPlace()">ابدأ تسجيل الأماكن →</button>
   </div>
 
   <!-- PLACE -->
-  <div id="p-place" class="page" style="max-width:500px;margin:0 auto">
+  <div id="pg-place" class="pg" style="max-width:500px;margin:0 auto">
     <div class="place-banner">
       <div class="place-step" id="place-lbl">المكان 1</div>
       <input class="fi" id="place-input" placeholder="اسم المكان..." style="margin-bottom:0;margin-top:6px" />
     </div>
     <div class="chips" id="chips"></div>
     <div id="uploads"></div>
-    <div class="btn-row">
-      <button class="btn-end" onclick="finishTrip()">إنهاء الرحلة 🏁</button>
-      <button class="btn-next" onclick="nextPlace()">المكان التالي →</button>
+    <div id="err-place" class="err" style="display:none"></div>
+    <div class="brow">
+      <button class="btn-sec" onclick="finishTrip()">إنهاء الرحلة 🏁</button>
+      <button class="btn-main" style="flex:1" id="next-btn" onclick="nextPlace()">المكان التالي →</button>
     </div>
   </div>
 
-  <!-- SUMMARY -->
-  <div id="p-summary" class="page" style="max-width:500px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:1.5rem">
-      <div style="font-size:38px;margin-bottom:8px">🎉</div>
-      <div class="sum-title">ذكرياتكم</div>
-      <div class="sum-sub" id="sum-names"></div>
+  <!-- MAP FINALE -->
+  <div id="pg-map" class="pg" style="padding:0;max-width:580px;margin:0 auto">
+    <div id="map-container">
+      <div class="map-header">
+        <div class="map-title">🗺️ خريطة رحلتكم</div>
+        <div class="map-sub" id="map-names"></div>
+      </div>
+      <div class="map-canvas" id="map-canvas">
+        <svg id="path-svg" style="position:absolute;inset:0;width:100%;height:100%;z-index:1" viewBox="0 0 500 300" preserveAspectRatio="none">
+          <defs><marker id="mar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+          <path id="trip-path" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#mar)"/>
+        </svg>
+        <div id="map-dots"></div>
+      </div>
+      <div id="place-popup" class="place-popup">
+        <div class="popup-title" id="popup-title"></div>
+        <div id="popup-content"></div>
+      </div>
+      <div style="padding:0 1.5rem 1.5rem">
+        <button class="btn-main" onclick="newTrip()">رحلة جديدة ✈</button>
+      </div>
     </div>
-    <div id="sum-places"></div>
-    <button class="new-btn" onclick="newTrip()">رحلة جديدة ✈</button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="pg-loading" class="pg" style="max-width:480px;margin:0 auto">
+    <div class="loading" style="padding:4rem 2rem">
+      <div class="spinner"></div>
+      <div id="loading-msg">جاري التحميل...</div>
+    </div>
   </div>
 </div>
 
 <script>
-const themeNames={sakura:'وردي ساكورا 🌸',ocean:'المحيط الأزرق 🌊',sunset:'غروب الشمس 🌅',forest:'الغابة الخضراء 🌿',galaxy:'مجرة الفضاء 🌌'};
-let S={theme:'sakura',names:[],places:[],cur:{}};
-let pInterval=null;
+const SUPA_URL = 'https://yonarnybxygatmsnneka.supabase.co';
+const SUPA_KEY = 'sb_publishable_BydYslSXbjiD3ny8fv1LCw_wo1xJ0Ks';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-function setTheme(t,el){
-  S.theme=t;
-  document.getElementById('app').className='t-'+t;
-  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('theme-name-lbl').textContent=themeNames[t];
+const themeNames = {sakura:'وردي ساكورا 🌸',ocean:'المحيط الأزرق 🌊',sunset:'غروب الشمس 🌅',forest:'الغابة الخضراء 🌿',galaxy:'مجرة الفضاء 🌌'};
+let S = {theme:'sakura',names:[],tripCode:'',tripId:'',myName:'',places:[],curPhotos:{}};
+let pInterval = null;
+
+/* ── SUPABASE ── */
+async function createTrip(names, theme) {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const {data, error} = await sb.from('trips').insert({id: crypto.randomUUID(), code, theme, names}).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function findTrip(code) {
+  const {data, error} = await sb.from('trips').select('*').eq('code', code).single();
+  if (error) throw error;
+  return data;
+}
+
+async function savePlace(tripCode, placeName, orderNum) {
+  const {data, error} = await sb.from('places').insert({trip_code: tripCode, place_name: placeName, order_num: orderNum}).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function uploadPhoto(placeId, travelerName, file) {
+  const ext = file.name.split('.').pop();
+  const path = `${placeId}/${travelerName}_${Date.now()}.${ext}`;
+  const {error: upErr} = await sb.storage.from('trip-photos').upload(path, file);
+  if (upErr) throw upErr;
+  const {data} = sb.storage.from('trip-photos').getPublicUrl(path);
+  const {error: dbErr} = await sb.from('photos').insert({place_id: placeId, traveler_name: travelerName, url: data.publicUrl});
+  if (dbErr) throw dbErr;
+  return data.publicUrl;
+}
+
+async function loadTripData(tripCode) {
+  const {data: places} = await sb.from('places').select('*').eq('trip_code', tripCode).order('order_num');
+  if (!places) return [];
+  const result = [];
+  for (const place of places) {
+    const {data: photos} = await sb.from('photos').select('*').eq('place_id', place.id);
+    result.push({...place, photos: photos || []});
+  }
+  return result;
+}
+
+/* ── THEME ── */
+function setTheme(t, el) {
+  S.theme = t;
+  document.getElementById('app').className = 't-' + t;
+  document.querySelectorAll('.sw').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (document.getElementById('theme-lbl')) document.getElementById('theme-lbl').textContent = themeNames[t];
   startParticles();
 }
 
-function addPerson(){
-  const c=document.getElementById('extra-names');
-  const count=c.querySelectorAll('.person-row').length;
-  if(count>=5){document.getElementById('add-btn').style.display='none';return;}
-  const div=document.createElement('div');
-  div.className='person-row';
-  div.innerHTML=`<input class="fi" style="margin:0" placeholder="اسم الشخص ${count+2}..."><button class="rm-btn" onclick="this.parentNode.remove();checkAdd()">✕</button>`;
+/* ── TABS ── */
+function switchTab(t) {
+  document.getElementById('tab-new').style.display = t === 'new' ? 'block' : 'none';
+  document.getElementById('tab-join').style.display = t === 'join' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', (i===0&&t==='new')||(i===1&&t==='join')));
+}
+
+/* ── PERSONS ── */
+function addPerson() {
+  const c = document.getElementById('extra-names');
+  const count = c.querySelectorAll('.prow').length;
+  if (count >= 5) { document.getElementById('add-btn').style.display = 'none'; return; }
+  const div = document.createElement('div');
+  div.className = 'prow';
+  div.innerHTML = `<input class="fi" style="margin:0" placeholder="اسم الشخص ${count+2}..."><button class="rmbtn" onclick="this.parentNode.remove();checkAdd()">✕</button>`;
   c.appendChild(div);
-  if(c.querySelectorAll('.person-row').length>=5) document.getElementById('add-btn').style.display='none';
+  if (c.querySelectorAll('.prow').length >= 5) document.getElementById('add-btn').style.display = 'none';
 }
-function checkAdd(){
-  if(document.getElementById('extra-names').querySelectorAll('.person-row').length<5)
-    document.getElementById('add-btn').style.display='block';
-}
-
-function getNames(){
-  const m=document.getElementById('name-main').value.trim();
-  if(!m) return null;
-  const extras=Array.from(document.querySelectorAll('#extra-names .fi')).map(i=>i.value.trim()).filter(Boolean);
-  return [m,...extras];
+function checkAdd() {
+  if (document.getElementById('extra-names').querySelectorAll('.prow').length < 5)
+    document.getElementById('add-btn').style.display = 'block';
 }
 
-function startTrip(){
-  const names=getNames();
-  if(!names){
-    const inp=document.getElementById('name-main');
-    inp.classList.add('error-shake');
-    inp.style.borderColor='#e53935';
-    setTimeout(()=>{inp.classList.remove('error-shake');inp.style.borderColor=''},600);
-    return;
+/* ── START TRIP ── */
+async function startTrip() {
+  const m = document.getElementById('name-main').value.trim();
+  if (!m) { shakeEl('name-main'); return; }
+  const extras = Array.from(document.querySelectorAll('#extra-names .fi')).map(i => i.value.trim()).filter(Boolean);
+  const names = [m, ...extras];
+  S.myName = m;
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true; btn.textContent = 'جاري الإنشاء...';
+  try {
+    const trip = await createTrip(names, S.theme);
+    S.names = names; S.tripCode = trip.code; S.tripId = trip.id;
+    document.getElementById('trip-code-display').textContent = trip.code;
+    showPage('pg-code');
+  } catch(e) {
+    showErr('err-new', 'حصل خطأ، حاول مرة ثانية');
   }
-  S.names=names;S.places=[];S.cur={};
-  renderPlace();
-  showPage('p-place');
+  btn.disabled = false; btn.textContent = 'ابدأ رحلتك ✈';
 }
 
-function renderPlace(){
-  document.getElementById('place-lbl').textContent='المكان '+(S.places.length+1);
-  document.getElementById('place-input').value='';
-  S.cur={};
-  S.names.forEach(n=>{S.cur[n]=[]});
-  document.getElementById('chips').innerHTML=S.names.map(n=>`<span class="chip">${n}</span>`).join('');
-  document.getElementById('uploads').innerHTML=S.names.map(name=>`
-    <div class="t-card">
-      <div class="t-head">
-        <div class="avatar">${name[0]}</div>
-        <span class="t-nm">${name}</span>
+/* ── JOIN TRIP ── */
+async function joinTrip() {
+  const name = document.getElementById('join-name').value.trim();
+  const code = document.getElementById('join-code').value.trim();
+  if (!name) { shakeEl('join-name'); return; }
+  if (code.length !== 6) { shakeEl('join-code'); return; }
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = 'جاري البحث...';
+  try {
+    const trip = await findTrip(code);
+    S.myName = name;
+    S.names = trip.names.includes(name) ? trip.names : [...trip.names, name];
+    S.tripCode = trip.code; S.tripId = trip.id; S.theme = trip.theme;
+    setTheme(trip.theme, null);
+    goToPlace();
+  } catch(e) {
+    showErr('err-join', 'الكود غير صحيح، تأكد منه وحاول مرة ثانية');
+  }
+  btn.disabled = false; btn.textContent = 'انضم للرحلة 🚀';
+}
+
+function goToPlace() {
+  S.places = [];
+  renderPlace();
+  showPage('pg-place');
+}
+
+/* ── PLACE PAGE ── */
+let placeFiles = {};
+
+function renderPlace() {
+  const num = S.places.length + 1;
+  document.getElementById('place-lbl').textContent = 'المكان ' + num;
+  document.getElementById('place-input').value = '';
+  placeFiles = {};
+  S.names.forEach(n => { placeFiles[n] = []; });
+  document.getElementById('chips').innerHTML = S.names.map(n => `<span class="chip">${n}</span>`).join('');
+  document.getElementById('uploads').innerHTML = S.names.map(name => `
+    <div class="tcard">
+      <div class="thead">
+        <div class="av">${name[0]}</div>
+        <span class="tnm">${name}</span>
       </div>
-      <div class="upload-zone" onclick="document.getElementById('uf_${encodeURI(name)}').click()">
-        <input type="file" id="uf_${encodeURI(name)}" multiple accept="image/*" onchange="handlePhoto(event,'${name.replace(/'/g,"\\'")}')">
-        <div class="upload-ico">📷</div>
-        <div class="upload-lbl">اضغط لرفع الصور</div>
+      <div class="upzone" onclick="document.getElementById('uf_${encodeURIComponent(name)}').click()">
+        <input type="file" id="uf_${encodeURIComponent(name)}" multiple accept="image/*" onchange="previewPhotos(event,'${name.replace(/'/g,"\\'")}')">
+        <div style="font-size:22px;margin-bottom:4px;color:var(--a2)">📷</div>
+        <div style="font-size:12px;color:var(--a2)">اضغط لرفع الصور</div>
       </div>
-      <div class="photo-row" id="pr_${encodeURI(name)}"></div>
+      <div class="prow2" id="pr_${encodeURIComponent(name)}"></div>
     </div>
   `).join('');
 }
 
-function handlePhoto(e,name){
-  Array.from(e.target.files).forEach(f=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      if(!S.cur[name]) S.cur[name]=[];
-      S.cur[name].push(ev.target.result);
-      const grid=document.getElementById('pr_'+encodeURI(name));
-      if(grid){const img=document.createElement('img');img.src=ev.target.result;img.className='photo-thumb';grid.appendChild(img);}
-    };
+function previewPhotos(e, name) {
+  const files = Array.from(e.target.files);
+  if (!placeFiles[name]) placeFiles[name] = [];
+  placeFiles[name].push(...files);
+  const grid = document.getElementById('pr_' + encodeURIComponent(name));
+  files.forEach(f => {
+    const img = document.createElement('img');
+    img.className = 'pthumb';
+    const r = new FileReader();
+    r.onload = ev => { img.src = ev.target.result; };
     r.readAsDataURL(f);
+    grid.appendChild(img);
   });
 }
 
-function saveCur(){
-  const pname=document.getElementById('place-input').value.trim();
-  if(!pname) return false;
-  S.places.push({name:pname,photos:JSON.parse(JSON.stringify(S.cur))});
-  return true;
-}
-
-function nextPlace(){
-  if(!saveCur()){
-    const inp=document.getElementById('place-input');
-    inp.classList.add('error-shake');
-    inp.style.borderColor='#e53935';
-    setTimeout(()=>{inp.classList.remove('error-shake');inp.style.borderColor=''},600);
-    return;
-  }
+async function nextPlace() {
+  const pname = document.getElementById('place-input').value.trim();
+  if (!pname) { shakeEl('place-input'); return; }
+  await saveCurrentPlace(pname);
   burst();
   renderPlace();
 }
 
-function finishTrip(){
-  const pname=document.getElementById('place-input').value.trim();
-  if(pname) saveCur();
-  if(!S.places.length){alert('أضف مكاناً واحداً على الأقل 📍');return;}
-  renderSummary();
-  burst();
-  showPage('p-summary');
+async function finishTrip() {
+  const pname = document.getElementById('place-input').value.trim();
+  if (pname) await saveCurrentPlace(pname);
+  if (!S.places.length) { showErr('err-place','أضف مكاناً واحداً على الأقل 📍'); return; }
+  showLoadingPage('جاري تحميل خريطة رحلتكم...');
+  try {
+    const data = await loadTripData(S.tripCode);
+    renderMap(data);
+    burst();
+    showPage('pg-map');
+  } catch(e) {
+    renderMap(S.places);
+    showPage('pg-map');
+  }
 }
 
-function renderSummary(){
-  document.getElementById('sum-names').textContent=S.names.join(' · ');
-  document.getElementById('sum-places').innerHTML=S.places.map((p,i)=>`
-    <div class="sum-card">
-      <div class="sum-card-title"><span class="pnum">${i+1}</span>${p.name}</div>
-      ${S.names.map(nm=>{
-        const photos=p.photos[nm]||[];
-        return `<div class="sum-t-lbl">${nm}${photos.length?' ('+photos.length+' صورة)':' — لا صور'}</div>
-        ${photos.length?`<div class="sum-photos">${photos.map(s=>`<img src="${s}">`).join('')}</div>`:''}`;
-      }).join('')}
-    </div>
-  `).join('');
+async function saveCurrentPlace(pname) {
+  const btn = document.getElementById('next-btn');
+  btn.disabled = true; btn.textContent = 'جاري الحفظ...';
+  try {
+    const place = await savePlace(S.tripCode, pname, S.places.length);
+    const photoUrls = {};
+    for (const name of S.names) {
+      photoUrls[name] = [];
+      const files = placeFiles[name] || [];
+      for (const file of files) {
+        try {
+          const url = await uploadPhoto(place.id, name, file);
+          photoUrls[name].push(url);
+        } catch(e) {}
+      }
+    }
+    S.places.push({id: place.id, place_name: pname, photos: Object.entries(photoUrls).map(([traveler_name, urls]) => urls.map(url => ({traveler_name, url}))).flat()});
+  } catch(e) {
+    showErr('err-place', 'حصل خطأ في الحفظ، حاول مرة ثانية');
+  }
+  btn.disabled = false; btn.textContent = 'المكان التالي →';
 }
 
-function newTrip(){
-  document.getElementById('name-main').value='';
-  document.getElementById('extra-names').innerHTML='';
-  document.getElementById('add-btn').style.display='block';
-  S={theme:S.theme,names:[],places:[],cur:{}};
-  showPage('p-setup');
+/* ── MAP ── */
+function renderMap(places) {
+  document.getElementById('map-names').textContent = S.names.join(' · ');
+  const canvas = document.getElementById('map-canvas');
+  const dotsDiv = document.getElementById('map-dots');
+  dotsDiv.innerHTML = '';
+  if (!places.length) return;
+
+  const positions = generatePositions(places.length);
+  const pathD = positions.map((p,i) => `${i===0?'M':'L'}${p.x*500},${p.y*300}`).join(' ');
+  document.getElementById('trip-path').setAttribute('d', pathD);
+
+  positions.forEach((pos, i) => {
+    const place = places[i];
+    const dot = document.createElement('div');
+    dot.className = 'place-dot';
+    dot.style.left = (pos.x * 100) + '%';
+    dot.style.top = (pos.y * 100) + '%';
+    const photoCount = place.photos ? place.photos.length : 0;
+    dot.innerHTML = `<div class="dot-circle" onclick="showPopup(${i})">${i+1}</div><div class="dot-label">${place.place_name} ${photoCount?'📷'+photoCount:''}</div>`;
+    dotsDiv.appendChild(dot);
+  });
+  window._mapPlaces = places;
 }
 
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.style.display='none'});
-  const pg=document.getElementById(id);
-  pg.style.display='block';
-  requestAnimationFrame(()=>pg.classList.add('active'));
+function generatePositions(n) {
+  if (n === 1) return [{x:0.5, y:0.5}];
+  const positions = [];
+  const padding = 0.15;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const x = padding + t * (1 - 2 * padding) + (Math.sin(i * 1.5) * 0.08);
+    const y = 0.3 + Math.sin(t * Math.PI) * 0.4 + (Math.cos(i * 2) * 0.08);
+    positions.push({x: Math.max(0.12, Math.min(0.88, x)), y: Math.max(0.15, Math.min(0.85, y))});
+  }
+  return positions;
 }
 
-function startParticles(){
-  const canvas=document.getElementById('particles');
-  const ctx=canvas.getContext('2d');
-  const app=document.getElementById('app');
-  canvas.width=app.offsetWidth;canvas.height=app.offsetHeight;
-  const palettes={sakura:['#f48fb1','#f8bbd0','#fce4ec','#e91e63'],ocean:['#64b5f6','#90caf9','#bbdefb','#1976d2'],sunset:['#ffab40','#ffd54f','#ffe082','#ff7043'],forest:['#81c784','#a5d6a7','#c8e6c9','#4caf50'],galaxy:['#e040fb','#ce93d8','#b39ddb','#7c4dff']};
-  const cols=palettes[S.theme]||palettes.sakura;
-  const pts=Array.from({length:35},()=>({x:Math.random()*canvas.width,y:canvas.height+Math.random()*80,r:Math.random()*4+2,c:cols[Math.floor(Math.random()*cols.length)],speed:Math.random()*0.7+0.3,drift:(Math.random()-0.5)*0.4,op:Math.random()*0.5+0.3}));
-  if(pInterval) clearInterval(pInterval);
-  pInterval=setInterval(()=>{
+function showPopup(idx) {
+  const place = window._mapPlaces[idx];
+  const popup = document.getElementById('place-popup');
+  document.getElementById('popup-title').textContent = `📍 ${place.place_name}`;
+  const photos = place.photos || [];
+  const byTraveler = {};
+  photos.forEach(p => {
+    if (!byTraveler[p.traveler_name]) byTraveler[p.traveler_name] = [];
+    byTraveler[p.traveler_name].push(p.url);
+  });
+  let html = '';
+  if (Object.keys(byTraveler).length === 0) {
+    html = '<div style="font-size:13px;color:var(--tx);opacity:0.6">لا توجد صور لهذا المكان</div>';
+  } else {
+    for (const [name, urls] of Object.entries(byTraveler)) {
+      html += `<div class="popup-traveler"><div class="popup-t-lbl">${name}</div><div class="popup-photos">${urls.map(u=>`<img src="${u}" loading="lazy">`).join('')}</div></div>`;
+    }
+  }
+  document.getElementById('popup-content').innerHTML = html;
+  popup.classList.add('active');
+}
+
+/* ── HELPERS ── */
+function showPage(id) {
+  document.querySelectorAll('.pg').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+  const pg = document.getElementById(id);
+  pg.style.display = 'block';
+  requestAnimationFrame(() => pg.classList.add('active'));
+}
+function showLoadingPage(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  showPage('pg-loading');
+}
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+function shakeEl(id) {
+  const el = document.getElementById(id);
+  el.classList.add('shake');
+  el.style.borderColor = '#e53935';
+  setTimeout(() => { el.classList.remove('shake'); el.style.borderColor = ''; }, 600);
+}
+function newTrip() {
+  document.getElementById('name-main').value = '';
+  document.getElementById('extra-names').innerHTML = '';
+  document.getElementById('add-btn').style.display = 'block';
+  S = {theme: S.theme, names:[], tripCode:'', tripId:'', myName:'', places:[], curPhotos:{}};
+  switchTab('new');
+  showPage('pg-setup');
+}
+
+/* ── PARTICLES ── */
+function startParticles() {
+  const canvas = document.getElementById('pc');
+  const ctx = canvas.getContext('2d');
+  const app = document.getElementById('app');
+  canvas.width = app.offsetWidth; canvas.height = app.offsetHeight;
+  const pals = {sakura:['#f48fb1','#f8bbd0','#fce4ec','#e91e63'],ocean:['#64b5f6','#90caf9','#bbdefb','#1976d2'],sunset:['#ffab40','#ffd54f','#ffe082','#ff7043'],forest:['#81c784','#a5d6a7','#c8e6c9','#4caf50'],galaxy:['#e040fb','#ce93d8','#b39ddb','#7c4dff']};
+  const cols = pals[S.theme] || pals.sakura;
+  const pts = Array.from({length:30}, () => ({x:Math.random()*canvas.width, y:canvas.height+Math.random()*80, r:Math.random()*4+2, c:cols[Math.floor(Math.random()*cols.length)], speed:Math.random()*0.7+0.3, drift:(Math.random()-0.5)*0.4, op:Math.random()*0.5+0.3}));
+  if (pInterval) clearInterval(pInterval);
+  pInterval = setInterval(() => {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    pts.forEach(p=>{
-      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=p.c;ctx.globalAlpha=p.op;ctx.fill();
-      p.y-=p.speed;p.x+=p.drift;p.op-=0.0015;
-      if(p.y<-10||p.op<=0){p.y=canvas.height+10;p.x=Math.random()*canvas.width;p.op=Math.random()*0.5+0.3;p.c=cols[Math.floor(Math.random()*cols.length)];}
+    pts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.c; ctx.globalAlpha = p.op; ctx.fill();
+      p.y -= p.speed; p.x += p.drift; p.op -= 0.0015;
+      if (p.y < -10 || p.op <= 0) { p.y = canvas.height+10; p.x = Math.random()*canvas.width; p.op = Math.random()*0.5+0.3; p.c = cols[Math.floor(Math.random()*cols.length)]; }
     });
-    ctx.globalAlpha=1;
-  },40);
+    ctx.globalAlpha = 1;
+  }, 40);
 }
 
-function burst(){
-  const canvas=document.getElementById('particles');
-  const ctx=canvas.getContext('2d');
-  const cx=canvas.width/2,cy=canvas.height/2;
-  const palettes={sakura:['#f48fb1','#e91e63'],ocean:['#64b5f6','#0d47a1'],sunset:['#ffab40','#e64a19'],forest:['#81c784','#388e3c'],galaxy:['#e040fb','#7c4dff']};
-  const cols=palettes[S.theme]||palettes.sakura;
-  const pts=Array.from({length:24},()=>{const a=Math.random()*Math.PI*2;return{x:cx,y:cy,vx:Math.cos(a)*(Math.random()*6+2),vy:Math.sin(a)*(Math.random()*6+2),r:Math.random()*5+2,c:cols[Math.floor(Math.random()*2)],op:1};});
-  let f=0;
-  const anim=setInterval(()=>{
-    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.op-=0.04;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c;ctx.globalAlpha=Math.max(0,p.op);ctx.fill();});
-    ctx.globalAlpha=1;
-    if(++f>35) clearInterval(anim);
-  },20);
+function burst() {
+  const canvas = document.getElementById('pc');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width/2, cy = canvas.height/2;
+  const pals = {sakura:['#f48fb1','#e91e63'],ocean:['#64b5f6','#0d47a1'],sunset:['#ffab40','#e64a19'],forest:['#81c784','#388e3c'],galaxy:['#e040fb','#7c4dff']};
+  const cols = pals[S.theme] || pals.sakura;
+  const pts = Array.from({length:24}, () => { const a = Math.random()*Math.PI*2; return {x:cx,y:cy,vx:Math.cos(a)*(Math.random()*6+2),vy:Math.sin(a)*(Math.random()*6+2),r:Math.random()*5+2,c:cols[Math.floor(Math.random()*2)],op:1}; });
+  let f = 0;
+  const anim = setInterval(() => {
+    pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; p.op-=0.04; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.c; ctx.globalAlpha=Math.max(0,p.op); ctx.fill(); });
+    ctx.globalAlpha = 1;
+    if (++f > 35) clearInterval(anim);
+  }, 20);
 }
 
-window.addEventListener('load',()=>{
+window.addEventListener('load', () => {
   startParticles();
-  new ResizeObserver(()=>{
-    const a=document.getElementById('app'),c=document.getElementById('particles');
-    if(c){c.width=a.offsetWidth;c.height=a.offsetHeight;}
+  new ResizeObserver(() => {
+    const a = document.getElementById('app'), c = document.getElementById('pc');
+    if (c) { c.width = a.offsetWidth; c.height = a.offsetHeight; }
   }).observe(document.getElementById('app'));
 });
 </script>
